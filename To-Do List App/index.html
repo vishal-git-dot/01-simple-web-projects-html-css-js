@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List App</title>
+  <style>
+    :root {
+      --bg-color: #fdfdfd;
+      --text-color: #333;
+      --container-bg: #ffffff;
+      --item-bg: #f5f5f5;
+      --completed-color: #aaa;
+    }
+
+    body.dark-mode {
+      --bg-color: #1e1e1e;
+      --text-color: #eee;
+      --container-bg: #2c2c2c;
+      --item-bg: #3a3a3a;
+      --completed-color: #777;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .todo-container {
+      background: var(--container-bg);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      width: 90%;
+      max-width: 400px;
+      transition: background 0.3s;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .todo-input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: var(--item-bg);
+      padding: 10px;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      color: var(--completed-color);
+    }
+
+    button {
+      background: #ff4d4f;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button.complete {
+      background: #52c41a;
+      margin-right: 5px;
+    }
+
+    #theme-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px;
+      background: #555;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <h2>To-Do List</h2>
+    <input type="text" id="todo-input" class="todo-input" placeholder="Add a new task...">
+    <ul id="todo-list"></ul>
+  </div>
+
+  <button id="theme-toggle">Toggle Theme</button>
+
+  <script>
+    const todoInput = document.getElementById('todo-input');
+    const todoList = document.getElementById('todo-list');
+    const themeToggle = document.getElementById('theme-toggle');
+
+    function loadTodos() {
+      const todos = JSON.parse(localStorage.getItem('todos')) || [];
+      todos.forEach(todo => addTodo(todo.text, todo.completed));
+    }
+
+    function saveTodos() {
+      const todos = [];
+      document.querySelectorAll('#todo-list li').forEach(li => {
+        todos.push({
+          text: li.querySelector('span').textContent,
+          completed: li.classList.contains('completed')
+        });
+      });
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    function addTodo(text, completed = false) {
+      const li = document.createElement('li');
+      if (completed) li.classList.add('completed');
+
+      const span = document.createElement('span');
+      span.textContent = text;
+      span.style.flex = '1';
+
+      // Edit on double-click
+      span.ondblclick = () => {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = span.textContent;
+        input.style.flex = '1';
+        input.style.marginRight = '5px';
+        span.replaceWith(input);
+        input.focus();
+
+        input.onblur = () => {
+          if (input.value.trim() !== '') {
+            span.textContent = input.value.trim();
+          }
+          input.replaceWith(span);
+          saveTodos();
+        };
+
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            input.blur();
+          }
+        });
+      };
+
+      const completeBtn = document.createElement('button');
+      completeBtn.textContent = '✓';
+      completeBtn.classList.add('complete');
+      completeBtn.onclick = () => {
+        li.classList.toggle('completed');
+        saveTodos();
+      };
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'X';
+      deleteBtn.onclick = () => {
+        li.remove();
+        saveTodos();
+      };
+
+      li.appendChild(completeBtn);
+      li.appendChild(span);
+      li.appendChild(deleteBtn);
+      todoList.appendChild(li);
+
+      saveTodos();
+    }
+
+    todoInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && todoInput.value.trim() !== '') {
+        addTodo(todoInput.value.trim());
+        todoInput.value = '';
+      }
+    });
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+    }
+
+    loadTheme();
+    loadTodos();
+  </script>
+</body>
+</html>
