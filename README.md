@@ -23,10 +23,10 @@ This is the first project in the **Simple Web Projects** series — a beginner-f
 ## 📸 Screenshots
 
 ### Light Mode Page
-![screenshot light-mode](assets/screenshot-1.png)
+![screenshot light-mode](assets/Screenshot-1.png)
 
 ### Dark Mode Page
-![screenshot dark-mode](assets/screenshot-2.png)
+![screenshot dark-mode](assets/Screenshot-2.png)
 
 ---
 
